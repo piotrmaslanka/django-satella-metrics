@@ -1,9 +1,8 @@
-import typing as tp
 from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
 from django.http import HttpResponse
 from satella.time import measure
-from satella.instrumentation.metrics import Metric, getMetric
+from satella.instrumentation.metrics import getMetric
 from satella.instrumentation.metrics.exporters import metric_data_collection_to_prometheus
 
 __version__ = '0.1a1'
@@ -27,6 +26,7 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
             self.histogram_metric = getMetric('django.histogram', 'histogram')
             self.status_codes_metric = getMetric('django.status_codes', 'counter')
             self.monitor_metrics = False
+            self.url_getter = lambda request: request.path
         else:
             django_satella_metrics = settings.DJANGO_SATELLA_METRICS
             try:
@@ -42,6 +42,8 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
             except KeyError:
                 self.status_codes_metric = getMetric('django.status_codes', 'summary')
             self.monitor_metrics = settings.DJANGO_SATELLA_METRICS.get('monitor_metrics', False)
+            self.url_getter = settings.DJANGO_SATELLA_METRICS.get('url_getter',
+                                                                  lambda request: request.path)
 
         self.get_response = get_response
 
@@ -49,9 +51,10 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
         with measure() as measurement:
             response = self.get_response(request)
         if request.path != '/metrics':
-            self.summary_metric.runtime(measurement(), url=request.path)
-            self.histogram_metric.runtime(measurement(), url=request.path)
-            self.status_codes_metric.runtime(+1, status_code=response.status_code, url=request.path)
+            url = self.url_getter(request)
+            self.summary_metric.runtime(measurement(), url=url)
+            self.histogram_metric.runtime(measurement(), url=url)
+            self.status_codes_metric.runtime(+1, status_code=response.status_code, url=url)
         return response
 
 

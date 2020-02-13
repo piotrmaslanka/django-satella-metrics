@@ -7,7 +7,6 @@ django-satella-metrics
 [![PyPI](https://img.shields.io/pypi/pyversions/django-satella-metrics.svg)](https://pypi.python.org/pypi/django-satella-metrics)
 [![PyPI version](https://badge.fury.io/py/django-satella-metrics.svg)](https://badge.fury.io/py/django-satella-metrics)
 [![PyPI](https://img.shields.io/pypi/implementation/django-satella-metrics.svg)](https://pypi.python.org/pypi/django-satella-metrics)
-[![Documentation Status](https://readthedocs.org/projects/django-satella-metrics/badge/?version=latest)](http://django-satella-metrics.readthedocs.io/en/latest/?badge=latest)
 
 django-satella-metrics is a library to measure [Django's](https://github.com/django/django) 
 requests using [Satella's](https://github.com/piotrmaslanka/satella) metrics
@@ -33,6 +32,9 @@ Or pass any other metrics that you'd like. This is the default configuration, so
 as if you passed the listed code.
 
 ## Extra configuration
+
+If you want URL readed from the request in a different way than reading URL, you can define a key called `url_getter`.
+This should contain a callable that accepts a single argument, the request passed, and return a str, the URL to use.
 
 Additionally, if you want the Prometheus exporter to add extra labels to your exported metrics, you can add a key to
 the config of name `extra_labels` which will contain a dict with the labels to add, eg.
