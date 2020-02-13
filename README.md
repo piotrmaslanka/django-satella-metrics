@@ -14,3 +14,20 @@ requests using [Satella's](https://github.com/piotrmaslanka/satella) metrics
 
 See [LICENSE](LICENSE) for text of the license. This library may contain
 code taken from elsewhere on the internets, so this is copyright (c) respective authors.
+
+Usage
+=====
+
+Define the following in your settings:
+
+```python
+from satella.instrumentation.metrics import getMetric
+DJANGO_SATELLA_METRICS = {
+    'summary_metric': getMetric('django.summary', 'summary'),
+    'histogram_metric': getMetric('django.histogram', 'histogram'),
+    'status_codes_metric': getMetric('django.status_codes', 'counter')
+}
+```
+
+Or pass any other metrics that you'd like. This is the default configuration, so if you pass nothing it will be 
+as if you passed the listed code.

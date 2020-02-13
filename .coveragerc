@@ -1,0 +1,8 @@
+[run]
+branch=1
+source=
+  django_satella_metrics
+omit=
+  tests/*
+  .eggs/*
+  setup.py

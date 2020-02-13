@@ -1,37 +1,51 @@
 import typing as tp
 from django.utils.deprecation import MiddlewareMixin
+from django.conf import settings
 from satella.time import measure
 from satella.instrumentation.metrics import Metric, getMetric
 __version__ = '0.1a1'
 
 
-def get_satella_metrics(summary_metric: tp.Optional[Metric] = None,
-                        histogram_metric: tp.Optional[Metric] = None,
-                        request_code_metric: tp.Optional[Metric] = None):
-    """
-    Return a middleware class for usage in Django.
+__all__ = ['DjangoSatellaMetricsMiddleware']
 
-    :param summary_metric: summary metric to use. If not specified, default metric of
-        django.summary will be used
-    :param histogram_metric: histogram metric to use. If not specified, default metric of
-        django.histogram will be used
-    :param request_code_metric: request code metric to use. If not specified, default metric of
-        django.request_codes will be used. Should be of type counter.
-    :return:
+
+class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
+    """
+    A middleware for measing Django calls using Satella's metrics.
+
+    Make sure that this middleware launches first and exits last.
+
+    This takes the following from settings
     """
 
-    class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
-        def __init__(self, get_response):
-            self.get_response = get_response
-            self.get_response_name = get_response.__module__ + '.' + get_response.__qualname__
+    def __init__(self, get_response):
+        if not hasattr(settings, 'DJANGO_SATELLA_METRICS'):
+            self.summary_metric = getMetric('django.summary', 'summary')
+            self.histogram_metric = getMetric('django.histogram', 'histogram')
+            self.status_codes_metric = getMetric('django.status_codes', 'counter')
+        else:
+            django_satella_metrics = settings.DJANGO_SATELLA_METRICS
+            try:
+                self.summary_metric = django_satella_metrics['summary_metric']
+            except KeyError:
+                self.summary_metric = getMetric('django.summary', 'summary')
+            try:
+                self.histogram_metric = django_satella_metrics['histogram_metric']
+            except KeyError:
+                self.histogram_metric = getMetric('django.histogram', 'histogram')
+            try:
+                self.status_codes_metric = django_satella_metrics['status_codes_metric']
+            except KeyError:
+                self.status_codes_metric = getMetric('django.status_codes', 'summary')
 
-        def __call__(self, request):
-            with measure() as measurement:
-                response = self.get_response(request)
-            summary_metric.runtime(measurement(), view=self.get_response_name)
-            histogram_metric.runtime(measurement(), view=self.get_response_name)
-            request_code_metric.runtime(+1, status_code=response.status_code)
-            return response
+        self.get_response = get_response
+        self.get_response_name = get_response.__module__ + '.' + get_response.__qualname__
 
-    return DjangoSatellaMetricsMiddleware
+    def __call__(self, request):
+        with measure() as measurement:
+            response = self.get_response(request)
+        self.summary_metric.runtime(measurement(), view=self.get_response_name)
+        self.histogram_metric.runtime(measurement(), view=self.get_response_name)
+        self.request_code_metric.runtime(+1, status_code=response.status_code)
+        return response
 
