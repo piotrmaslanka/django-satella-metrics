@@ -17,6 +17,8 @@ code taken from elsewhere on the internets, so this is copyright (c) respective 
 Usage
 =====
 
+First, add the following to your `MIDDLEWARE`: `'django_satella_metrics.DjangoSatellaMetricsMiddleware'`
+
 Define the following in your settings:
 
 ```python
