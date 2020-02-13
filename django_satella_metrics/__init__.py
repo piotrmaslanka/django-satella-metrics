@@ -5,10 +5,10 @@ from satella.time import measure
 from satella.instrumentation.metrics import getMetric
 from satella.instrumentation.metrics.exporters import metric_data_collection_to_prometheus
 
-__version__ = '0.1a1'
+__version__ = '1.0'
 
 
-__all__ = ['DjangoSatellaMetricsMiddleware', 'export_metrics']
+__all__ = ['DjangoSatellaMetricsMiddleware', 'export_metrics', '__version__']
 
 
 class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
