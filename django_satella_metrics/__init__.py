@@ -43,14 +43,20 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
 
         self.get_response = get_response
 
-    def __call__(self, request):
-        with measure() as measurement:
-            response = self.get_response(request)
+    def process_request(self, request):
+        request.metric_time_measurement = measure()
+        request.metric_time_measurement.start()
+
+    def process_response(self, request, response):
+        measurement = request.metric_time_measurement
+        measurement.stop()
+
         if request.path != '/metrics':
             url = self.url_getter(request)
             self.summary_metric.runtime(measurement(), url=url)
             self.histogram_metric.runtime(measurement(), url=url)
             self.status_codes_metric.runtime(+1, status_code=response.status_code, url=url)
+
         return response
 
 

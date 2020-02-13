@@ -4,5 +4,6 @@ source=
   django_satella_metrics
 omit=
   tests/*
+  test_it/*
+  manage.py
   .eggs/*
-  setup.py

@@ -14,8 +14,10 @@ install:
   - pip install -r requirements.txt
   - pip install coverage
 script:
-  - export PYTHONPATH=tests
-  - coverage run tests/manage.py test
+  - cd tests
+  - export PYTHONPATH=..
+  - cp ../.coveragerc ../*.cfg .
+  - coverage run manage.py test
 after_success:
   - coverage xml
   - ./cc-test-reporter after-build -t coverage.py --exit-code $TRAVIS_TEST_RESULT
