@@ -28,19 +28,15 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
             self.monitor_metrics = False
             self.url_getter = lambda request: request.path
         else:
-            django_satella_metrics = settings.DJANGO_SATELLA_METRICS
-            try:
-                self.summary_metric = django_satella_metrics['summary_metric']
-            except KeyError:
-                self.summary_metric = getMetric('django.summary', 'summary')
-            try:
-                self.histogram_metric = django_satella_metrics['histogram_metric']
-            except KeyError:
-                self.histogram_metric = getMetric('django.histogram', 'histogram')
-            try:
-                self.status_codes_metric = django_satella_metrics['status_codes_metric']
-            except KeyError:
-                self.status_codes_metric = getMetric('django.status_codes', 'summary')
+            def try_get(field_name, def_metric_name, def_metric_type):
+                if field_name not in settings.DJANGO_SATELLA_METRICS:
+                    setattr(self, field_name, getMetric(def_metric_name, def_metric_type))
+                else:
+                    setattr(self, field_name, settings.DJANGO_SATELLA_METRICS[field_name])
+
+            try_get('summary_metric', 'django.summary', 'summary')
+            try_get('histogram_metric', 'django.histogram', 'histogram')
+            try_get('status_codes_metric', 'django.status_codes', 'counter')
             self.monitor_metrics = settings.DJANGO_SATELLA_METRICS.get('monitor_metrics', False)
             self.url_getter = settings.DJANGO_SATELLA_METRICS.get('url_getter',
                                                                   lambda request: request.path)
