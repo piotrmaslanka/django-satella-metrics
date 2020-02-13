@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.urls import path
 from test_it.views import hello_world
+from django_satella_metrics import export_metrics
 
 urlpatterns = [
-    path('/', hello_world),
+    path('metrics', export_metrics),
+    path('', hello_world),
 ]

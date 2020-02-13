@@ -31,3 +31,44 @@ DJANGO_SATELLA_METRICS = {
 
 Or pass any other metrics that you'd like. This is the default configuration, so if you pass nothing it will be 
 as if you passed the listed code.
+
+## Extra configuration
+
+Additionally, if you want the Prometheus exporter to add extra labels to your exported metrics, you can add a key to
+the config of name `extra_labels` which will contain a dict with the labels to add, eg.
+
+```python
+DJANGO_SATELLA_METRICS = {
+    'extra_labels': {
+        'service_name': 'my_service',
+        'instance': 1
+    }
+}
+```
+
+If you specify `monitor_metrics`, which is a bool, to be True, then `/metrics` endpoint will also be considered during
+monitoring.
+
+## Exporting from the same server
+
+If you want to export metrics to Prometheus using Django, here you go. Just add following rule to your `urlpatterns`:
+
+```python
+from django_satella_metrics import export_metrics
+
+urlpatterns = [
+    ... ,
+    path('metrics', export_metrics),
+    ...
+]
+```
+
+## External Prometheus server
+
+If you want to set up an external Prometheus server, use the following snippet:
+
+```python
+from satella.instrumentation.metrics.exporters import PrometheusHTTPExporterThread
+phet = PrometheusHTTPExporterThread('0.0.0.0', 8080, {'service_name': 'my_service'})
+phet.start()
+```

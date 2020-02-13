@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_satella_metrics'
+    'django_satella_metrics.DjangoSatellaMetricsMiddleware'
 ]
 
 ROOT_URLCONF = 'tests.urls'
@@ -125,5 +125,9 @@ from satella.instrumentation.metrics import getMetric
 DJANGO_SATELLA_METRICS = {
     'summary_metric': getMetric('django.summary', 'summary'),
     'histogram_metric': getMetric('django.histogram', 'histogram'),
-    'status_codes_metric': getMetric('django.status_codes', 'counter')
+    'status_codes_metric': getMetric('django.status_codes', 'counter'),
+    'extra_labels': {
+        'service_name': 'test'
+    },
+    'monitor_metrics': False
 }
