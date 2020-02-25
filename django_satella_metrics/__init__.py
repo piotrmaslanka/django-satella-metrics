@@ -5,7 +5,7 @@ from satella.time import measure
 from satella.instrumentation.metrics import getMetric
 from satella.instrumentation.metrics.exporters import metric_data_collection_to_prometheus
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 
 __all__ = ['DjangoSatellaMetricsMiddleware', 'export_metrics', '__version__']
@@ -63,6 +63,9 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
 def export_metrics(request):
     """A Django view to output the metrics"""
     root_data = getMetric().to_metric_data()
+    for datum in root_data.values:
+        if datum.internal:
+            root_data.values.remove(datum)
     if hasattr(settings, 'DJANGO_SATELLA_METRICS'):
         root_data.add_labels(settings.DJANGO_SATELLA_METRICS.get('extra_labels', {}))
     return HttpResponse(metric_data_collection_to_prometheus(root_data))
