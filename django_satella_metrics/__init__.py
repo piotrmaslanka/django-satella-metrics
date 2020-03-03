@@ -1,9 +1,8 @@
-import logging
-logger = logging.getLogger(__name__)
+import warnings
 try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
-    logger.warning('You are using a very old version of Django. Please update')
+    warnings.warn('You are using a very old version of Django. Please consider updating', Warning)
     MiddlewareMixin = object
 
 from django.conf import settings
@@ -12,7 +11,7 @@ from satella.time import measure
 from satella.instrumentation.metrics import getMetric
 from satella.instrumentation.metrics.exporters import metric_data_collection_to_prometheus
 
-__version__ = '1.3'
+__version__ = '1.5'
 
 
 __all__ = ['DjangoSatellaMetricsMiddleware', 'export_metrics', '__version__']
@@ -27,7 +26,7 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
     This takes the following from settings
     """
 
-    def __init__(self, get_response):
+    def __init__(self, get_response=None):
         if not hasattr(settings, 'DJANGO_SATELLA_METRICS'):
             self.summary_metric = getMetric('django.summary', 'summary')
             self.histogram_metric = getMetric('django.histogram', 'histogram')
@@ -47,8 +46,8 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
             self.monitor_metrics = settings.DJANGO_SATELLA_METRICS.get('monitor_metrics', False)
             self.url_getter = settings.DJANGO_SATELLA_METRICS.get('url_getter',
                                                                   lambda request: request.path)
-
-        self.get_response = get_response
+        if get_response is not None:
+            super().__init__(get_response)
 
     def process_request(self, request):
         request.metric_time_measurement = measure()
@@ -58,7 +57,7 @@ class DjangoSatellaMetricsMiddleware(MiddlewareMixin):
         measurement = request.metric_time_measurement
         measurement.stop()
 
-        if request.path != '/metrics':
+        if request.path != '/metrics' or self.monitor_metrics:
             url = self.url_getter(request)
             self.summary_metric.runtime(measurement(), url=url)
             self.histogram_metric.runtime(measurement(), url=url)

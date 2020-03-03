@@ -14,8 +14,10 @@ requests using [Satella's](https://github.com/piotrmaslanka/satella) metrics
 See [LICENSE](LICENSE) for text of the license. This library may contain
 code taken from elsewhere on the internets, so this is copyright (c) respective authors.
 
-Usage
-=====
+As far as compatible Djangos are considered: This has been tested as early as Django 1.8 with Python 3.6
+and as late as Django 3.0.3 with Python 3.8. Enjoy!
+
+# Usage
 
 First, add the following to your `MIDDLEWARE` (or `MIDDLEWARE_CLASSES`):
 `'django_satella_metrics.DjangoSatellaMetricsMiddleware'`
@@ -47,12 +49,13 @@ DJANGO_SATELLA_METRICS = {
     'extra_labels': {
         'service_name': 'my_service',
         'instance': 1
-    }
+    },
+    'monitor_metrics': False
 }
 ```
 
-If you specify `monitor_metrics`, which is a bool, to be True, then `/metrics` endpoint will also be considered during
-monitoring.
+If you specify `monitor_metrics`, which is a bool, to be True, then `/metrics` endpoint will also be
+considered during monitoring.
 
 ## Exporting from the same server
 
@@ -77,3 +80,4 @@ from satella.instrumentation.metrics.exporters import PrometheusHTTPExporterThre
 phet = PrometheusHTTPExporterThread('0.0.0.0', 8080, {'service_name': 'my_service'})
 phet.start()
 ```
+ 
