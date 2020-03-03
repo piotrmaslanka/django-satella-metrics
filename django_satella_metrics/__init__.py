@@ -1,11 +1,18 @@
-from django.utils.deprecation import MiddlewareMixin
+import logging
+logger = logging.getLogger(__name__)
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    logger.warning('You are using a very old version of Django. Please update')
+    MiddlewareMixin = object
+
 from django.conf import settings
 from django.http import HttpResponse
 from satella.time import measure
 from satella.instrumentation.metrics import getMetric
 from satella.instrumentation.metrics.exporters import metric_data_collection_to_prometheus
 
-__version__ = '1.2'
+__version__ = '1.3'
 
 
 __all__ = ['DjangoSatellaMetricsMiddleware', 'export_metrics', '__version__']
