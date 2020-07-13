@@ -1,3 +1,7 @@
+# v1.6
+
+* fixed to be compatible with latest satella
+
 # v1.5
 
 * enabled option to monitor also the `/metrics` endpoint
