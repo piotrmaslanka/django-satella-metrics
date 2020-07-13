@@ -7,9 +7,9 @@ python:
   - "pypy3.5"
 cache: pip
 before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > tests/cc-test-reporter
+  - chmod +x tests/cc-test-reporter
+  - tests/cc-test-reporter before-build
 install:
   - pip install -r requirements.txt
   - pip install coverage
