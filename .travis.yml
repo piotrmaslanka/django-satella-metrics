@@ -18,7 +18,6 @@ script:
   - export PYTHONPATH=..
   - cp ../.coveragerc ../*.cfg .
   - coverage run manage.py test
-after_success:
   - coverage xml
   - ./cc-test-reporter after-build -t coverage.py --exit-code $TRAVIS_TEST_RESULT
 
